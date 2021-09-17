@@ -1,0 +1,67 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "vpc peering dev",
+        "Parameters":{
+            "ownerId":{
+                "Type":"String",
+                "Default":"851128091050"
+            },
+            "CicdAccount": {
+                "Description": "AWS AccountNumber for Tools",
+                "Type": "Number",
+                "Default":"851128091050"
+            }
+        },
+        "Resources": {
+            
+            "ssmUser": {
+               "Type": "AWS::IAM::User",
+               "Properties": {
+                  "Path": "/",
+                  "LoginProfile": { "Password" : "Maddt@123" },
+                  "Policies": [ {
+                    "PolicyName": {
+                        "Fn::Sub": "ssmUser"
+                    },
+                    "PolicyDocument": {
+                        "Version": "2012-10-17",
+                        "Statement": [
+                            {
+                                "Effect": "Allow",
+                                "Action": [
+                                "ssm:GetParameters",
+                                "ssm:GetParameter"
+                                ],
+                                "Resource": 
+                               {"Fn::Sub": "arn:aws:ssm:ap-southeast-2:${CicdAccount}:parameter/vpc"}
+                                
+                            },
+                                {
+                                "Effect": "Allow",
+                                "Action": "ssm:DescribeParameters",
+                                "Resource": "*"
+                                }
+                        ]
+                    }
+                } 
+            ]  
+        } 
+            
+        },
+
+        "myaccesskey" : {
+            "Type" : "AWS::IAM::AccessKey",
+            "Properties" : {
+               "UserName" : { "Ref" : "ssmUser" }
+            }
+         } ,
+            
+            
+            "vpcA": {
+              "Type": "AWS::EC2::VPC",
+              "Properties": {
+                "CidrBlock": "10.20.0.0/16"
+              }
+            }
+        }
+}

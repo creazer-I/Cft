@@ -1,0 +1,100 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "just a instance",
+      
+        "Parameters": {
+        
+    
+        "EnvironmentType":{
+            "Type":"String",
+            "Default":"Test",
+            "AllowedValues":["Test","Prod"],
+            "ConstraintDescription":"Either Prod or Test"
+        }
+    
+        },
+    
+        "Mappings":{
+            "EnvironmentValue":{
+                "Prod":{
+                    "ami1":"ami-0567f647e75c7bc05",
+                    "ami2":"ami-0567f647e75c7bc05",
+                    "Value":"Amazon Linux 2",
+                    "Value1":"Ubuntu"
+                },
+    
+                "Test":{
+                    "ami3":"ami-0567f647e75c7bc05",
+                    "Value":"Ubuntu"
+                }
+            }
+        },
+    
+        "Conditions":{
+            "ProdRes":{
+                "Fn::Equals":[{"Ref":"EnvironmentType"},"Prod"]},
+            "TestRes":{    
+                "Fn::Equals":[{"Ref":"EnvironmentType"},"Test"]
+            }
+        },
+    
+    
+        "Resources": {
+             
+            "name": {
+                "Type": "AWS::EC2::Instance",
+                "Condition":"ProdRes",
+                "Properties": {
+                    "ImageId": {"Fn::FindInMap":["EnvironmentValue",{"Ref":"EnvironmentType"},"ami1" ]},
+                    "InstanceType": "t2.micro",
+                    "Tags": [
+                        {
+                            "Key": "Name",
+                            "Value": {"Fn::FindInMap":["EnvironmentValue",{"Ref":"EnvironmentType"},"Value"]}
+                        }
+                    ]
+                   
+                            
+                }
+            },
+    
+            "name2": {
+                "Type": "AWS::EC2::Instance",
+                "Condition":"TestRes",
+                "Properties": {
+                    "ImageId": {"Fn::FindInMap":["EnvironmentValue",{"Ref":"EnvironmentType"},"ami3" ]},
+                    "InstanceType": "t2.micro",
+                    "Tags": [
+                        {
+                            "Key": "Name",
+                            "Value": {"Fn::FindInMap":["EnvironmentValue",{"Ref":"EnvironmentType"},"Value"]}
+                        }
+                    ]
+                   
+                            
+                }
+            },
+    
+            "name3": {
+                "Type": "AWS::EC2::Instance",
+                "Condition":"ProdRes",
+                "Properties": {
+                    "ImageId": {"Fn::FindInMap":["EnvironmentValue",{"Ref":"EnvironmentType"},"ami2" ]},
+                    "InstanceType": "t2.micro",
+                    "Tags": [
+                        {
+                            "Key": "Name",
+                            "Value": {"Fn::FindInMap":["EnvironmentValue",{"Ref":"EnvironmentType"},"Value1"]}
+                        }
+                    ]
+                   
+                            
+                }
+            }
+        }
+    
+      
+       
+                    
+    }
+     

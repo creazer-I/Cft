@@ -1,0 +1,34 @@
+{
+"AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "vpc peering",
+    "Parameters": {
+    
+    },
+    "Resources": {
+        "vpcA": {
+          "Type": "AWS::EC2::VPC",
+          "Properties": {
+            "CidrBlock": "10.0.0.0/16"
+          }
+        },
+        "BasicParameter": {
+            "Type": "AWS::SSM::Parameter",
+            "Properties": {
+               "Name": "vpc",
+               "Type": "String",
+               "Value": {"Ref":"vpcA"},
+                        "Description": "vpc",
+                        "Tags": {
+                            "Environment": "DEV"
+                        }
+                    }
+                }
+    },
+    "Outputs":{
+        "arn":{
+            "Value":{
+                
+            }
+        }
+    }
+}

@@ -1,0 +1,223 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Role to be assumed by CodePipeline service cross account",
+    "Parameters": {
+        "S3Bucket": {
+            "Description": "S3 Bucket in Tools Account",
+            "Type": "String",
+            "Default":"crx-pipeline-12"
+        },
+        "cicdAccount": {
+            "Description": "AWS AccountNumber for Tools",
+            "Type": "Number",
+            "Default":"851128091050"
+        },
+        "CMKARN": {
+            "Description": "ARN of the KMS CMK creates in Tools account",
+            "Type": "String",
+            "Default":"arn:aws:kms:ap-southeast-2:851128091050:key/70102215-dbd8-4d06-bb90-8fafd65f4b68"
+        }
+    },
+    "Resources": {
+        "CFcrxRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "RoleName": {
+                    "Fn::Sub": "CodePipelineCloudFormationRolex"
+                },
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "AWS": [
+                                    {
+                                        "Ref": "cicdAccount"
+                                    }
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "Path": "/"
+            }
+        },
+        "CFPolicy": {
+            "Type": "AWS::IAM::Policy",
+            "Properties": {
+                "PolicyName": {
+                    "Fn::Sub": "CodePipelineCloudFormationPolicyx"
+                },
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "cloudformation:*",
+                                "s3:*",
+                                "iam:PassRole"
+                            ],
+                            "Resource": "*"
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "s3:PutObject",
+                                "s3:GetBucketPolicy",
+                                "s3:GetObject",
+                                "s3:ListBucket"
+                            ],
+                            "Resource": [
+                                {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "arn:aws:s3:::",
+                                            {
+                                                "Ref": "S3Bucket"
+                                            },
+                                            "/*"
+                                        ]
+                                    ]
+                                },
+                                {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "arn:aws:s3:::",
+                                            {
+                                                "Ref": "S3Bucket"
+                                            }
+                                        ]
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "kms:*"
+                            ],
+                            "Resource": {
+                                "Ref": "CMKARN"
+                            }
+                        }
+                    ]
+                },
+                "Roles": [
+                    {
+                        "Ref": "CFcrxRole"
+                    }
+                ]
+            }
+        },
+        "CfAction": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "RoleName": {
+                    "Fn::Sub": "cloudformationdeployer-roley"
+                },
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "cloudformation.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "Path": "/"
+            }
+        },
+        "CfActionPolicy": {
+            "Type": "AWS::IAM::Policy",
+            "Properties": {
+                "PolicyName": {
+                    "Fn::Sub": "cloudformationdeployer-policy-y-permission"
+                },
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                
+                                "iam:CreateRole",
+                                "iam:CreatePolicy",
+                                "iam:GetRole",
+                                "iam:DeleteRole",
+                                "iam:PutRolePolicy",
+                                "iam:PassRole",
+                                "iam:DeleteRolePolicy",
+                                "iam:CreateServiceLinkedRole",
+                                "iam:DeleteServiceLinkedRole",
+                                "iam:GetServiceLinkedRoleDeletionStatus",
+                                "cloudformation:*",
+                                "iam:DetachRolePolicy",
+                                "apigateway:POST",
+                                "apigateway:GET",
+                                "apigateway:PATCH",
+                                "apigateway:DELETE",
+                                "s3:*",
+                                "codecommit:*",
+                                "ec2:*"
+                            ],
+                            "Resource": "*"
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "s3:PutObject",
+                                "s3:GetBucketPolicy",
+                                "s3:GetObject",
+                                "s3:ListBucket"
+                            ],
+                            "Resource": [
+                                {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "arn:aws:s3:::",
+                                            {
+                                                "Ref": "S3Bucket"
+                                            },
+                                            "/*"
+                                        ]
+                                    ]
+                                },
+                                {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "arn:aws:s3:::",
+                                            {
+                                                "Ref": "S3Bucket"
+                                            }
+                                        ]
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "Roles": [
+                    {
+                        "Ref": "CfAction"
+                    }
+                ]
+            }
+        }
+    }
+}

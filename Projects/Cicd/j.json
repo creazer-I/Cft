@@ -1,0 +1,135 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "CodePipeline for the Sample Lambda Function",
+    "Parameters": {
+        "ProjectName": {
+            "Description": "Name of the Project",
+            "Type": "String",
+            "Default": "cicd-crx-dev"
+        },
+        "TestAccount": {
+            "Description": "AWS AccountNumber for test",
+            "Type": "Number",
+            "Default":"121560732360"
+        },
+        "CMKARN": {
+            "Description": "ARN of the KMS CMK creates in Tools account",
+            "Type": "String",
+            "Default":"arn:aws:kms:ap-southeast-2:851128091050:key/70102215-dbd8-4d06-bb90-8fafd65f4b68"
+        }
+        }
+    },
+
+    "Resources": {
+        "PipeLineRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "RoleName": {
+                    "Fn::Sub": "${ProjectName}-codepipeline-role"
+                },
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": 
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "codepipeline.amazonaws.com"
+                                ]
+                            },
+                            "Action": 
+                                "sts:AssumeRole"
+                        }
+                },
+                "Path": "/"
+            }
+        },
+        "PipelinePolicy": {
+            "Type": "AWS::IAM::Policy",
+            "Properties": {
+                "PolicyName": {
+                    "Fn::Sub": "${ProjectName}-codepipeline-policy"
+                },
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "codepipeline:*",
+                                "iam:ListRoles",
+                                "cloudformation:Describe*",
+                                "cloudFormation:List*",
+                                "codecommit:List*",
+                                "codecommit:Get*",
+                                "codecommit:GitPull",
+                                "codecommit:UploadArchive",
+                                "codecommit:CancelUploadArchive",
+                                "codebuild:BatchGetBuilds",
+                                "codebuild:StartBuild",
+                                "cloudformation:CreateStack",
+                                "cloudformation:DeleteStack",
+                                "cloudformation:DescribeStacks",
+                                "cloudformation:UpdateStack",
+                                "cloudformation:CreateChangeSet",
+                                "cloudformation:DeleteChangeSet",
+                                "cloudformation:DescribeChangeSet",
+                                "cloudformation:ExecuteChangeSet",
+                                "cloudformation:SetStackPolicy",
+                                "cloudformation:ValidateTemplate",
+                                "iam:PassRole",
+                                "s3:ListAllMyBuckets",
+                                "s3:GetBucketLocation"
+                            ],
+                            "Resource": [
+                                "*"
+                            ]
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "kms:*"
+                            ],
+                            "Resource": {
+                                "Ref": "CMKARN"
+                            }
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "s3:PutObject",
+                                "s3:GetBucketPolicy",
+                                "s3:GetObject",
+                                "s3:ListBucket"
+                            ],
+                            "Resource": [
+                                {
+                                    "Fn::Sub": "arn:aws:s3:::${DeploymentArtifactBucket}/"
+                                },
+                                {
+                                    "Fn::Sub": "arn:aws:s3:::${DeploymentArtifactBucket}/*"
+                                }
+                            ]
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Resource": [
+                                {
+                                    "Fn::Sub": "arn:aws:iam::${TestAccount}:role/CodePipelineCloudFormationRolex"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "Roles": [
+                    {
+                        "Ref": "PipeLineRole"
+                    }
+                ]
+            }
+        }
+    }
+}

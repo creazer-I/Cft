@@ -1,0 +1,171 @@
+{
+"AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Config Rules",
+    "Parameters": {
+        "ConfigMaxExecutionFrequency":{
+            "Type":"String",
+            "Description":"The maximum frequency with which AWS Config runs evaluations for a rule",
+            "Default":"TwentyFour_Hours"
+        }
+    },
+
+    "Resources": {
+        "ConfigRuleCloudtrailEnabled":{
+        "Type": "AWS::Config::ConfigRule",
+        "Properties":{
+            "ConfigRuleName" : "CloudtrailEnabled",
+            "Description" :"Ensure CloudTrail is enabled",
+            "Source": {
+                "Owner": "AWS",
+                "SourceIdentifier": "CLOUD_TRAIL_ENABLED"
+              },
+            "MaximumExecutionFrequency" :{"Ref":"ConfigMaxExecutionFrequency"}
+        }
+    },
+    "CloudtrailLogFileValidationEnabled":{
+        "Type": "AWS::Config::ConfigRule",
+        "Properties":{
+            "ConfigRuleName" : "cloudtrail-log-file-validation-enabled",
+            "Description" :"Ensure CloudTrail log file validation is enabled",
+            "Source": {
+                "Owner": "AWS",
+                "SourceIdentifier": "CLOUD_TRAIL_LOG_FILE_VALIDATION_ENABLED"
+              },
+            "MaximumExecutionFrequency" :{"Ref":"ConfigMaxExecutionFrequency"}
+        }
+    },
+    "CloudtrailMultiRegionEnabled":{
+        "Type": "AWS::Config::ConfigRule",
+        "Properties":{
+            "ConfigRuleName" : "cloudtrail-multi-region-enabled",
+            "Description" :"cloudtrail-multi-region-enabled",
+            "Source": {
+                "Owner": "AWS",
+                "SourceIdentifier": "MULTI_REGION_CLOUD_TRAIL_ENABLED"
+              },
+            "MaximumExecutionFrequency" :{"Ref":"ConfigMaxExecutionFrequency"}
+        }
+    },
+    "InstancesInVpc":{
+        "Type": "AWS::Config::ConfigRule",
+        "Properties":{
+            "ConfigRuleName" : "instances-in-vpc",
+            "Description" :"Ensure all EC2 instances run in a VPC",
+            "Source": {
+                "Owner": "AWS",
+                "SourceIdentifier": "INSTANCES_IN_VPC"
+              },
+            "MaximumExecutionFrequency" :{"Ref":"ConfigMaxExecutionFrequency"}
+        }
+    },
+    "RootAccountMfaEnabled":{
+        "Type": "AWS::Config::ConfigRule",
+        "Properties":{
+            "ConfigRuleName" : "root-account-mfa-enabled",
+            "Description" :"Ensure root AWS account has MFA enabled",
+            "Source": {
+                "Owner": "AWS",
+                "SourceIdentifier": "ROOT_ACCOUNT_MFA_ENABLED"
+              },
+            "MaximumExecutionFrequency" :{"Ref":"ConfigMaxExecutionFrequency"}
+        }
+    },
+    "Ec2VolumeInuseCheck":{
+        "Type": "AWS::Config::ConfigRule",
+        "Properties":{
+            "ConfigRuleName" : "ec2-volume-inuse-check",
+            "Description" :"Checks whether EBS volumes are attached to EC2 instances",
+            "Source": {
+                "Owner": "AWS",
+                "SourceIdentifier": "EC2_VOLUME_INUSE_CHECK"
+              },
+            "MaximumExecutionFrequency" :{"Ref":"ConfigMaxExecutionFrequency"}
+        }
+    },
+    "IamUserNoPoliciesCheck":{
+        "Type": "AWS::Config::ConfigRule",
+        "Properties":{
+            "ConfigRuleName" : "iam-user-no-policies-check",
+            "Description" :"Ensure that none of your IAM users have policies attached. IAM users must inherit permissions from IAM groups or roles.",
+            "Source": {
+                "Owner": "AWS",
+                "SourceIdentifier": "IAM_USER_NO_POLICIES_CHECK"
+              },
+            "MaximumExecutionFrequency" :{"Ref":"ConfigMaxExecutionFrequency"}
+        }
+    },
+    "RdsStorageEncrypted":{
+        "Type": "AWS::Config::ConfigRule",
+        "Properties":{
+            "ConfigRuleName" : "rds-storage-encrypted",
+            "Description" :"Checks whether storage encryption is enabled for your RDS DB instances.",
+            "Source": {
+                "Owner": "AWS",
+                "SourceIdentifier": "RDS_STORAGE_ENCRYPTED"
+              },
+            "MaximumExecutionFrequency" :{"Ref":"ConfigMaxExecutionFrequency"}
+        }
+    },
+    "Ec2ManagedInstancePatchComplianceStatusCheck":{
+        "Type": "AWS::Config::ConfigRule",
+        "Properties":{
+            "ConfigRuleName" : "ec2-managedinstance-patch-compliance-status-check",
+            "Description" :"Checks whether the compliance status of the AWS Systems Manager patch compliance is COMPLIANT or NON_COMPLIANT after the patch installation on the instance. The rule is compliant if the field status is COMPLIANT.",
+            "Source": {
+                "Owner": "AWS",
+                "SourceIdentifier": "EC2_MANAGEDINSTANCE_PATCH_COMPLIANCE_STATUS_CHECK"
+              },
+            "MaximumExecutionFrequency" :{"Ref":"ConfigMaxExecutionFrequency"}
+        }
+    },
+    "RdsInstancePublicAccessCheck":{
+        "Type": "AWS::Config::ConfigRule",
+        "Properties":{
+            "ConfigRuleName" : "rds-instance-public-access-check",
+            "Description" :"Checks whether the Amazon Relational Database Service (RDS) instances are not publicly accessible. The rule is non-compliant if the publiclyAccessible field is true in the instance configuration item.",
+            "Source": {
+                "Owner": "AWS",
+                "SourceIdentifier": "RDS_INSTANCE_PUBLIC_ACCESS_CHECK"
+              },
+            "MaximumExecutionFrequency" :{"Ref":"ConfigMaxExecutionFrequency"}
+        }
+    },
+    "RdsSnapshotsPublicProhibited":{
+        "Type": "AWS::Config::ConfigRule",
+        "Properties":{
+            "ConfigRuleName" : "rds-snapshots-public-prohibited",
+            "Description" :"Checks if Amazon Relational Database Service (Amazon RDS) snapshots are public.",
+            "Source": {
+                "Owner": "AWS",
+                "SourceIdentifier": "RDS_SNAPSHOTS_PUBLIC_PROHIBITED"
+              },
+            "MaximumExecutionFrequency" :{"Ref":"ConfigMaxExecutionFrequency"}
+        }
+    },
+    "S3BucketPublicWriteProhibited":{
+        "Type": "AWS::Config::ConfigRule",
+        "Properties":{
+            "ConfigRuleName" : "s3-bucket-public-write-prohibited",
+            "Description" :"Checks that your S3 buckets do not allow public write access.",
+            "Source": {
+                "Owner": "AWS",
+                "SourceIdentifier": "S3_BUCKET_PUBLIC_WRITE_PROHIBITED"
+              },
+            "MaximumExecutionFrequency" :{"Ref":"ConfigMaxExecutionFrequency"}
+        }
+    },
+    "GuarddutyEnabledCentralized":{
+        "Type": "AWS::Config::ConfigRule",
+        "Properties":{
+            "ConfigRuleName" : "guardduty-enabled-centralized",
+            "Description" :"Checks whether Amazon GuardDuty is enabled in your AWS account and region.",
+            "Source": {
+                "Owner": "AWS",
+                "SourceIdentifier": "GUARDDUTY_ENABLED_CENTRALIZED"
+              },
+            "MaximumExecutionFrequency" :{"Ref":"ConfigMaxExecutionFrequency"}
+        }
+    }
+    }
+
+}

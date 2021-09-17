@@ -1,0 +1,102 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Creates a CMK in KMS and grants access to other accounts",
+    "Parameters": {
+        "TestAccount": {
+            "Description": "AWS AccountNumber for test",
+            "Type": "Number"
+        }
+
+    },
+    "Resources": {
+        "KMSKey": {
+            "Type": "AWS::KMS::Key",
+            "Properties": {
+                "Description": "Used by Assumed Roles in Dev/Test/Prod accounts to Encrypt/Decrypt code",
+                "EnableKeyRotation": true,
+                "KeyPolicy": {
+                    "Version": "2012-10-17",
+                    "Id": {
+                        "Ref": "AWS::StackName"
+                    },
+                    "Statement": [
+                        {
+                            "Sid": "Allows admin of the key",
+                            "Effect": "Allow",
+                            "Principal": {
+                                "AWS": {
+                                    "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:root"
+                                }
+                            },
+                            "Action": [
+                                "kms:Create*",
+                                "kms:Describe*",
+                                "kms:Enable*",
+                                "kms:List*",
+                                "kms:Put*",
+                                "kms:Update*",
+                                "kms:Revoke*",
+                                "kms:Disable*",
+                                "kms:Get*",
+                                "kms:Delete*",
+                                "kms:ScheduleKeyDeletion",
+                                "kms:CancelKeyDeletion"
+                            ],
+                            "Resource": "*"
+                        },
+                        {
+                            "Sid": "Allow use of the key for CryptoGraphy",
+                            "Effect": "Allow",
+                            "Principal": {
+                                "AWS": [
+                                    {
+                                        "Fn::Sub": "arn:aws:iam::${TestAccount}:root"
+                                        
+                                    },
+                                    {
+                                        "Fn::Sub": "arn:aws:iam::${TestAccount}:role/CodePipelineCloudFormationRolex"
+                                    },
+                                    {
+                                        "Fn::Sub": "arn:aws:iam::${TestAccount}:role/cloudformationdeployer-roley"
+                                    },
+                                    {
+                                        "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/codepipeline-role"
+                                    }
+                                ]
+                            },
+                            "Action": [
+                                "kms:Encrypt",
+                                "kms:Decrypt",
+                                "kms:ReEncrypt*",
+                                "kms:GenerateDataKey*",
+                                "kms:DescribeKey"
+                            ],
+                            "Resource": "*"
+                        }
+                    ]
+                }
+            }
+        },
+        "KMSAlias": {
+            "Type": "AWS::KMS::Alias",
+            "Properties": {
+                "AliasName": {
+                    "Fn::Sub": "alias/codepipeline-crossaccounts"
+                },
+                "TargetKeyId": {
+                    "Ref": "KMSKey"
+                }
+            }
+        }
+    },
+    "Outputs": {
+        "CMK": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "KMSKey",
+                    "Arn"
+                ]
+            }
+        }
+    }
+}

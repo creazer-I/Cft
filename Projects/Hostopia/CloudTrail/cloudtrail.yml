@@ -1,0 +1,110 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Cloudtrail with S3 bucket
+Parameters:
+  S3BucketName:
+    Type: String
+    Default: hostopia-dev-cloudtrail
+    Description: S3 Bucket Name for CloudTrail
+  CloudTrailName:
+    Type: String
+    Default: hostopia-cloudtrail
+    Description: CloudTrail Name
+  Environment:
+    Description: The Environment
+    Type: String
+    Default: Dev
+  TagKeyA:
+    Description: Enter the Key
+    Type: String
+    Default: Name
+  TagValueA:
+    Description: Enter the Value
+    Type: String
+    Default: Anchor
+  TagKeyB:
+    Description: Enter the Key
+    Type: String
+    Default: Env
+  TagValueB:
+    Description: Enter the Value
+    Type: String
+    Default: Dev
+  TagKeyC:
+    Description: Enter the Key
+    Type: String
+    Default: CustomerId
+  TagValueC:
+    Description: Enter the Value
+    Type: String
+    Default: '111011'
+Resources:
+  CloudTrailBucket:
+    DeletionPolicy: Delete
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      AccessControl: Private
+      BucketName: !Ref S3BucketName
+      Tags:
+        - Key: !Ref TagKeyA
+          Value: !Ref TagValueA
+        - Key: !Ref TagKeyB
+          Value: !Ref TagValueB
+        - Key: !Ref TagKeyC
+          Value: !Ref TagValueC
+  BucketPolicy:
+    Type: 'AWS::S3::BucketPolicy'
+    Properties:
+      Bucket: !Ref CloudTrailBucket
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: AWSCloudTrailAclCheck
+            Effect: Allow
+            Principal:
+              Service: cloudtrail.amazonaws.com
+            Action: 's3:GetBucketAcl'
+            Resource: !Join 
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Ref CloudTrailBucket
+          - Sid: AWSCloudTrailWrite
+            Effect: Allow
+            Principal:
+              Service: cloudtrail.amazonaws.com
+            Action: 's3:PutObject'
+            Resource: !Join 
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Ref CloudTrailBucket
+                - /AWSLogs/
+                - !Ref 'AWS::AccountId'
+                - /*
+            Condition:
+              StringEquals:
+                's3:x-amz-acl': bucket-owner-full-control
+  cloudtrail:
+    DependsOn:
+      - BucketPolicy
+    Type: 'AWS::CloudTrail::Trail'
+    Properties:
+      TrailName: !Ref CloudTrailName
+      S3BucketName: !Ref CloudTrailBucket
+      IsLogging: true
+      Tags:
+        - Key: !Ref TagKeyA
+          Value: !Ref TagValueA
+        - Key: !Ref TagKeyB
+          Value: !Ref TagValueB
+        - Key: !Ref TagKeyC
+          Value: !Ref TagValueC
+Outputs:
+  BucketName:
+    Description: S3 Bucket for CloudTrail
+    Value: !Ref CloudTrailBucket
+    Export:
+      Name: !Sub '${Environment}-CloudTrailBucket'
+  CloudTrail:
+    Description: CloudTrail Name
+    Value: !Ref cloudtrail
+    Export:
+      Name: !Sub '${Environment}-CloudTrail'
