@@ -1,0 +1,6 @@
+{
+    "Parameters":{
+        "S3BucketName":"hostopia-dev-cloudtrail",
+        "CloudTrailName":"hostopia-cloudtrail"
+    }
+}
